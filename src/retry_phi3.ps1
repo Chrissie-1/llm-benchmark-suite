@@ -82,7 +82,9 @@ Re-run once that cleared.
 Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 '@
 $msgFile = Join-Path $env:TEMP 'phi3_commit_msg.txt'
-Set-Content -Path $msgFile -Value $msg -Encoding utf8
+# Not Set-Content -Encoding utf8: in PS 5.1 that writes a BOM, which git keeps as
+# the first character of the commit subject.
+[System.IO.File]::WriteAllText($msgFile, $msg, (New-Object System.Text.UTF8Encoding($false)))
 
 $code = Invoke-Native 'git' @('add', '-A') (Join-Path $root 'run_git.log')
 if ($code -eq 0) {

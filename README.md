@@ -55,10 +55,12 @@ column is the GSM8K figure.
 
 ## Reading the throughput numbers honestly
 
-The two Qwens generate at ~14.5 tok/s despite a 3× parameter difference. That is
-not a property of the models — it is bitsandbytes NF4 dequantization overhead
-dominating at this size. **These are not native-precision speeds.** In bf16 the
-0.5B would be several times faster and the two would separate clearly.
+All three models generate at 14–15 tok/s, and Phi-3-mini — 7.6× the parameters of
+the 0.5B — is nominally the *fastest* of them. That is not a property of the
+models: it is bitsandbytes NF4 dequantization overhead dominating at this size,
+which makes the throughput column nearly uninformative as a model comparison.
+**These are not native-precision speeds.** In bf16 the smaller models would be
+several times faster and the three would separate clearly.
 
 Everything runs 4-bit because Phi-3-mini's bf16 weights are 7.6 GB and do not fit
 an 8 GB card alongside activations. Quantizing all three keeps accuracy, speed and
@@ -117,7 +119,9 @@ $os = Get-CimInstance Win32_OperatingSystem
 ## Limitations
 
 - 100 examples per task gives a standard error around ±5 points. Differences
-  smaller than that are noise; the 0.24 → 0.54 GSM8K gap is not.
+  smaller than that are noise; the 0.24 → 0.77 GSM8K spread is not. The 0.57 → 0.62
+  MMLU step between Qwen2.5-1.5B and Phi-3-mini is within noise and should not be
+  read as a ranking.
 - MMLU is 4 subjects of 57. This is a sanity-check harness, not a leaderboard run.
 - Single run, no seed averaging. Decoding is greedy, so generation is deterministic,
   but sample choice is not varied.
