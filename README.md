@@ -13,22 +13,25 @@ peak GPU memory on a single 8 GB consumer GPU.
 
 Hardware: RTX 4060 Laptop (8 GB), batch size 1, greedy decoding, 4-bit NF4.
 
-| Model         | MMLU (5-shot) | GSM8K (8-shot) | Gen tok/s | Peak VRAM |
-|---------------|---------------|----------------|-----------|-----------|
-| Qwen2.5-0.5B  | 0.48          | 0.24           | 14.4      | 0.97 GB   |
-| Qwen2.5-1.5B  | 0.57          | 0.54           | 14.7      | 1.65 GB   |
-| Phi-3-mini    | pending       | pending        | pending   | pending   |
+Random chance on MMLU is 0.25, marked on the chart.
 
-Random chance on MMLU is 0.25, marked on the chart. Both models clear it, and both
-metrics separate the two models in the same direction — the 3× parameter increase
-buys +0.09 MMLU and +0.30 GSM8K.
+<!-- results:start -->
+| Model        |   MMLU (5-shot) |   GSM8K (8-shot) |   Gen tok/s | Peak VRAM   |
+|:-------------|----------------:|-----------------:|------------:|:------------|
+| Qwen2.5-0.5B |            0.48 |             0.24 |        14.4 | 0.97 GB     |
+| Qwen2.5-1.5B |            0.57 |             0.54 |        14.7 | 1.65 GB     |
 
 > **Phi-3-mini is pending.** The model loads and runs correctly; it is waiting on
 > host memory, not on a fix. Loading it needs ~7.6 GB of commit charge to mmap its
 > safetensors shards, and this machine has a fixed pagefile — see
 > [Notes on this hardware](#notes-on-this-hardware). `src/retry_phi3.ps1` waits for
 > headroom and merges its rows into the CSV, after which the chart and this table
-> are regenerated. The two rows above are final and unaffected.
+> are regenerated. The rows above are final and unaffected.
+
+
+Going from Qwen2.5-0.5B to Qwen2.5-1.5B buys +0.09 MMLU and +0.30 GSM8K.
+
+<!-- results:end -->
 
 ## Method
 
@@ -59,8 +62,8 @@ column is the GSM8K figure.
 
 ## Reading the throughput numbers honestly
 
-Both models generate at ~14.5 tok/s despite a 3× parameter difference. That is not
-a property of the models — it is bitsandbytes NF4 dequantization overhead
+The two Qwens generate at ~14.5 tok/s despite a 3× parameter difference. That is
+not a property of the models — it is bitsandbytes NF4 dequantization overhead
 dominating at this size. **These are not native-precision speeds.** In bf16 the
 0.5B would be several times faster and the two would separate clearly.
 

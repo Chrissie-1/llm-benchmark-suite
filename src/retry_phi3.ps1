@@ -31,10 +31,33 @@ $env:HF_HUB_DISABLE_SYMLINKS_WARNING = '1'
 & $python 'src/run.py' '--models' 'Phi-3-mini' *>&1 |
     Out-File -FilePath (Join-Path $root 'run_phi3.log') -Encoding utf8
 
-if ($LASTEXITCODE -eq 0) {
-    & $python 'src/report.py' *>&1 |
-        Out-File -FilePath (Join-Path $root 'run_report.log') -Encoding utf8
-    'PHI3 COMPLETE'
-} else {
+if ($LASTEXITCODE -ne 0) {
     "PHI3 FAILED with exit code $LASTEXITCODE - see run_phi3.log"
+    exit 1
 }
+
+# Only claim success if the rows actually landed in the CSV.
+$csv = Import-Csv (Join-Path $root 'results\benchmark.csv')
+$phi = @($csv | Where-Object { $_.model -eq 'Phi-3-mini' })
+if ($phi.Count -lt 2) {
+    "PHI3 INCOMPLETE: only $($phi.Count) row(s) in benchmark.csv"
+    exit 1
+}
+
+& $python 'src/report.py' *>&1 |
+    Out-File -FilePath (Join-Path $root 'run_report.log') -Encoding utf8
+
+& git add -A
+& git commit -m @'
+Add Phi-3-mini's rows to the benchmark
+
+The evaluation itself was never the blocker: loading Phi-3-mini needs about
+7.6 GB of commit charge to memory-map its safetensors shards, and this machine
+has a fixed pagefile, so the load failed whenever another process held commit.
+Re-run once that cleared.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+'@
+& git push origin master
+
+if ($LASTEXITCODE -eq 0) { 'PHI3 COMPLETE AND PUSHED' } else { 'PHI3 DONE BUT PUSH FAILED' }

@@ -158,9 +158,63 @@ def summary_table(df):
     return pd.DataFrame(rows)
 
 
+PENDING_NOTE = """
+> **Phi-3-mini is pending.** The model loads and runs correctly; it is waiting on
+> host memory, not on a fix. Loading it needs ~7.6 GB of commit charge to mmap its
+> safetensors shards, and this machine has a fixed pagefile — see
+> [Notes on this hardware](#notes-on-this-hardware). `src/retry_phi3.ps1` waits for
+> headroom and merges its rows into the CSV, after which the chart and this table
+> are regenerated. The rows above are final and unaffected.
+"""
+
+START = "<!-- results:start -->"
+END = "<!-- results:end -->"
+
+
+def observation(df):
+    """One line on the spread, written from whatever models are actually present."""
+    models = [m for m in MODEL_ORDER if m in set(df["model"])]
+    if len(models) < 2:
+        return ""
+    first, last = models[0], models[-1]
+    parts = []
+    for task, label in (("mmlu", "MMLU"), ("gsm8k", "GSM8K")):
+        lo = df[(df.model == first) & (df.task == task)]["accuracy"]
+        hi = df[(df.model == last) & (df.task == task)]["accuracy"]
+        if len(lo) and len(hi):
+            parts.append(f"{hi.iloc[0] - lo.iloc[0]:+.2f} {label}")
+    if not parts:
+        return ""
+    return f"\nGoing from {first} to {last} buys {' and '.join(parts)}.\n"
+
+
+def update_readme(df, readme=ROOT / "README.md"):
+    """Rewrite the marked results block so the table never drifts from the CSV."""
+    if not readme.exists():
+        return
+    text = readme.read_text(encoding="utf-8")
+    if START not in text or END not in text:
+        print("README markers missing - skipped")
+        return
+
+    block = [summary_table(df).to_markdown(index=False)]
+    if "Phi-3-mini" not in set(df["model"]):
+        block.append(PENDING_NOTE)
+    block.append(observation(df))
+
+    head, rest = text.split(START, 1)
+    _, tail = rest.split(END, 1)
+    readme.write_text(
+        f"{head}{START}\n" + "\n".join(b for b in block if b) + f"\n{END}{tail}",
+        encoding="utf-8",
+    )
+    print(f"updated {readme}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--csv", default=str(RESULTS / "benchmark.csv"))
+    parser.add_argument("--no-readme", action="store_true")
     args = parser.parse_args()
 
     df = pd.read_csv(args.csv)
@@ -169,6 +223,8 @@ def main():
 
     table = summary_table(df)
     (RESULTS / "summary.md").write_text(table.to_markdown(index=False) + "\n")
+    if not args.no_readme:
+        update_readme(df)
     print()
     print(table.to_string(index=False))
 
