@@ -204,9 +204,12 @@ def update_readme(df, readme=ROOT / "README.md"):
 
     head, rest = text.split(START, 1)
     _, tail = rest.split(END, 1)
+    # newline="\n": without it Windows translates to CRLF, so regenerating an
+    # unchanged report rewrites every line of the file.
     readme.write_text(
         f"{head}{START}\n" + "\n".join(b for b in block if b) + f"\n{END}{tail}",
         encoding="utf-8",
+        newline="\n",
     )
     print(f"updated {readme}")
 
@@ -222,7 +225,9 @@ def main():
     render(df, "dark", RESULTS / "benchmark-dark.png")
 
     table = summary_table(df)
-    (RESULTS / "summary.md").write_text(table.to_markdown(index=False) + "\n")
+    (RESULTS / "summary.md").write_text(
+        table.to_markdown(index=False) + "\n", encoding="utf-8", newline="\n"
+    )
     if not args.no_readme:
         update_readme(df)
     print()
