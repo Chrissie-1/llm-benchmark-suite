@@ -4,7 +4,7 @@
 # concurrent process holding commit makes the load fail with os error 1455.
 
 $ErrorActionPreference = 'Stop'
-$root = 'C:\Users\ASUS\benchmark'
+$root = 'C:\Users\ASUS\assay'
 $python = Join-Path $root '.venv\Scripts\python.exe'
 $needGB = 10          # largest shard is 4.97 GB; this leaves real headroom
 $deadline = (Get-Date).AddHours(6)
