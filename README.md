@@ -23,6 +23,13 @@ Random chance on MMLU is 0.25, marked on the chart. Both models clear it, and bo
 metrics separate the two models in the same direction — the 3× parameter increase
 buys +0.09 MMLU and +0.30 GSM8K.
 
+> **Phi-3-mini is pending.** The model loads and runs correctly; it is waiting on
+> host memory, not on a fix. Loading it needs ~7.6 GB of commit charge to mmap its
+> safetensors shards, and this machine has a fixed pagefile — see
+> [Notes on this hardware](#notes-on-this-hardware). `src/retry_phi3.ps1` waits for
+> headroom and merges its rows into the CSV, after which the chart and this table
+> are regenerated. The two rows above are final and unaffected.
+
 ## Method
 
 **MMLU (5-shot, 100 questions).** Scored by log-probability ranking over the
