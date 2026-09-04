@@ -20,16 +20,9 @@ Random chance on MMLU is 0.25, marked on the chart.
 |:-------------|----------------:|-----------------:|------------:|:------------|
 | Qwen2.5-0.5B |            0.48 |             0.24 |        14.4 | 0.97 GB     |
 | Qwen2.5-1.5B |            0.57 |             0.54 |        14.7 | 1.65 GB     |
+| Phi-3-mini   |            0.62 |             0.77 |        15.4 | 3.35 GB     |
 
-> **Phi-3-mini is pending.** The model loads and runs correctly; it is waiting on
-> host memory, not on a fix. Loading it needs ~7.6 GB of commit charge to mmap its
-> safetensors shards, and this machine has a fixed pagefile — see
-> [Notes on this hardware](#notes-on-this-hardware). `src/retry_phi3.ps1` waits for
-> headroom and merges its rows into the CSV, after which the chart and this table
-> are regenerated. The rows above are final and unaffected.
-
-
-Going from Qwen2.5-0.5B to Qwen2.5-1.5B buys +0.09 MMLU and +0.30 GSM8K.
+Going from Qwen2.5-0.5B to Phi-3-mini buys +0.14 MMLU and +0.53 GSM8K.
 
 <!-- results:end -->
 
