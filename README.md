@@ -1,4 +1,4 @@
-# assay
+# Assay — few-shot MMLU and GSM8K evaluation on one 8 GB GPU
 
 A small, reproducible evaluation harness comparing open-weight language models on
 reasoning (MMLU) and math (GSM8K), measuring accuracy, generation throughput and
