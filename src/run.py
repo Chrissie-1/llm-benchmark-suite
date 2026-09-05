@@ -1,4 +1,4 @@
-"""assay: a small, reproducible evaluation harness.
+"""llm-eval: a small, reproducible evaluation harness.
 
 Evaluates three causal LMs on MMLU (5-shot, multiple choice) and
 GSM8K (8-shot, chain-of-thought), recording accuracy, throughput and
